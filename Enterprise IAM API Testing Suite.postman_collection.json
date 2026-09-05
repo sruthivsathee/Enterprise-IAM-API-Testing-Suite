@@ -1,0 +1,1448 @@
+{
+  "info": {
+    "_postman_id": "d33f44f1-c6a9-48fe-b008-94d56637c717",
+    "name": "Enterprise IAM API Testing Suite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "31876883",
+    "_collection_link": "https://go.postman.co/collection/31876883-d33f44f1-c6a9-48fe-b008-94d56637c717?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01 Authentication",
+      "item": [
+        {
+          "name": "POST - Login (Valid Credentials)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.environment.set(\"access_token\", response.accessToken);\r\n\r\npm.test(\"Login successful\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Access token generated\", function () {\r\n    pm.expect(response.accessToken).to.exist;\r\n});\r\n\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"emilys\",\r\n  \"password\": \"emilyspass\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://dummyjson.com/auth/login",
+              "protocol": "https",
+              "host": [
+                "dummyjson",
+                "com"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "### Login API\n\nAuthenticates a user using username and password.\n\n**Method:** POST\n\n**Endpoint:** `/auth/login`\n\n**Authentication:** None\n\n**Expected Success:** 200 OK\n\n**Validations**\n\n- Status code is 200.\n    \n- Access token exists.\n    \n- Login successful.\n    \n- Response time is below 2 seconds."
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Login - Invalid Credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status code\r\npm.test(\"Status code is 400 Bad Request\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Error mentions invalid credentials\r\npm.test(\"Message mentions invalid credentials\", function () {\r\n    pm.expect(response.message.toLowerCase())\r\n        .to.match(/invalid|credential|username|password/);\r\n});\r\n\r\n// Response time\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"emilys\",\r\n  \"password\": \"WrongPassword123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://dummyjson.com/auth/login",
+              "protocol": "https",
+              "host": [
+                "dummyjson",
+                "com"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Invalid Endpoint - 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Status code validation\r\npm.test(\"Status code is 404 Not Found\", function () {\r\n    pm.response.to.have.status(404);\r\n});\r\n\r\n// Response contains 'Page not found'\r\npm.test(\"404 page contains 'Page not found'\", function () {\r\n    pm.expect(pm.response.text().toLowerCase()).to.include(\"page not found\");\r\n});\r\n\r\n// Response time validation\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/invalid-endpoint",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "invalid-endpoint"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Tests authentication APIs for user login and access token generation.\n\nCoverage:\n\n- Valid login credentials.\n    \n- Invalid login credentials.\n    \n- Access token validation.\n    \n- Response time validation."
+    },
+    {
+      "name": "02 Negative Testing",
+      "item": [
+        {
+          "name": "GET Invalid Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();\r\n\r\n// Status Code Validation\r\npm.test(\"Status code is 401\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Error message indicates invalid token\r\npm.test(\"Message mentions invalid or expired token\", function () {\r\n    pm.expect(response.message.toLowerCase())\r\n        .to.match(/invalid|expired|token|unauthorized/);\r\n});\r\n\r\n// Response time validation\r\npm.test(\"Response time is below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_secret_0ogv}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Missing Authentication",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();\r\n\r\n// Status Code Validation\r\npm.test(\"Status code is 401\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Exact error message validation\r\npm.test(\"Access token is required\", function () {\r\n    pm.expect(response.message).to.eql(\"Access Token is required\");\r\n});\r\n\r\n// Response time validation\r\npm.test(\"Response time is below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Invalid User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();\r\n\r\n// Status code validation\r\npm.test(\"Status code is 404\", function () {\r\n    pm.response.to.have.status(404);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Error message contains 'not found'\r\npm.test(\"Message contains 'not found'\", function () {\r\n    pm.expect(response.message.toLowerCase()).to.include(\"not found\");\r\n});\r\n\r\n// Response time check\r\npm.test(\"Response time is below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Expired Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Forbidden Access",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404 because endpoint doesn't exist in DummyJSON\", function () {\r\n    pm.response.to.have.status(404);\r\n});\r\n\r\npm.test(\"HTML Page Not Found returned\", function () {\r\n    pm.expect(pm.response.text().toLowerCase()).to.include(\"page not found\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/admin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Login - Missing Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// DummyJSON limitation\r\npm.test(\"DummyJSON accepts missing email (expected limitation)\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\n// Email is empty instead of missing\r\npm.test(\"Email field is empty\", function () {\r\n    pm.expect(response.email).to.eql(\"\");\r\n});\r\n\r\n// ID generated\r\npm.test(\"New user ID generated\", function () {\r\n    pm.expect(response.id).to.exist;\r\n});\r\n\r\n// Response time\r\npm.test(\"Response time is below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"Sruthi\",\r\n  \"lastName\": \"VS\",\r\n  \"age\": 25,\r\n  \"password\": \"Password@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Invalid Email Format",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// DummyJSON limitation\r",
+                  "pm.test(\"DummyJSON accepts invalid email format\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "// Email exists\r",
+                  "pm.test(\"Email field exists\", function () {\r",
+                  "    pm.expect(response.email).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "// Email does not contain @\r",
+                  "pm.test(\"Email format is invalid (missing @)\", function () {\r",
+                  "    pm.expect(response.email).to.not.include(\"@\");\r",
+                  "});\r",
+                  "\r",
+                  "// Response time\r",
+                  "pm.test(\"Response time is below 2 seconds\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"Sruthi\",\r\n  \"lastName\": \"VS\",\r\n  \"email\": \"sruthi.gmail.com\",\r\n  \"password\": \"Password@123\",\r\n  \"age\": 25\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Password Too Short",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// DummyJSON limitation\r",
+                  "pm.test(\"DummyJSON accepts short password (expected limitation)\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "// Password exists\r",
+                  "pm.test(\"Password field exists\", function () {\r",
+                  "    pm.expect(response.password).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "// Password is actually short\r",
+                  "pm.test(\"Password length is less than 6\", function () {\r",
+                  "    pm.expect(response.password.length).to.be.below(6);\r",
+                  "});\r",
+                  "\r",
+                  "// Response time\r",
+                  "pm.test(\"Response time is below 2 seconds\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"Sruthi\",\r\n  \"lastName\": \"VS\",\r\n  \"age\": 25,\r\n  \"email\": \"sruthi@gmail.com\",\r\n  \"username\": \"sruthi_vs\",\r\n  \"password\": \"123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Invalid User ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status code validation\r\npm.test(\"Status code is 404\", function () {\r\n    pm.response.to.have.status(404);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Error message contains 'not found'\r\npm.test(\"Message contains 'not found'\", function () {\r\n    pm.expect(response.message.toLowerCase()).to.include(\"not found\");\r\n});\r\n\r\n// Response time validation\r\npm.test(\"Response time is below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"Updated Name\",\r\n  \"age\": 30\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Missing Authentication",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status code\r\npm.test(\"Status code is 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Exact error message\r\npm.test(\"Access Token is required message returned\", function () {\r\n    pm.expect(response.message).to.eql(\"Access Token is required\");\r\n});\r\n\r\n// Response time\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"Sruthi Updated\",\r\n  \"age\": 26\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Missing Authentication",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status code\r\npm.test(\"Status code is 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Exact error message\r\npm.test(\"Access Token is required message returned\", function () {\r\n    pm.expect(response.message).to.eql(\"Access Token is required\");\r\n});\r\n\r\n// Response time\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Invalid Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// Status code\r",
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "// Error message exists\r",
+                  "pm.test(\"Error message exists\", function () {\r",
+                  "    pm.expect(response.message).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "// Exact error message\r",
+                  "pm.test(\"Access Token is required message returned\", function () {\r",
+                  "    pm.expect(response.message).to.eql(\"Access Token is required\");\r",
+                  "});\r",
+                  "\r",
+                  "// Response time\r",
+                  "pm.test(\"Response time below 2 seconds\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Expired Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// Status code\r",
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "// Error message exists\r",
+                  "pm.test(\"Error message exists\", function () {\r",
+                  "    pm.expect(response.message).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "// Exact error message\r",
+                  "pm.test(\"Access Token is required message returned\", function () {\r",
+                  "    pm.expect(response.message).to.eql(\"Access Token is required\");\r",
+                  "});\r",
+                  "\r",
+                  "// Response time\r",
+                  "pm.test(\"Response time below 2 seconds\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Invalid User ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// Status code\r",
+                  "pm.test(\"Status code is 404 Not Found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "// Error message exists\r",
+                  "pm.test(\"Error message exists\", function () {\r",
+                  "    pm.expect(response.message).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "// Error mentions user not found\r",
+                  "pm.test(\"Message contains 'not found'\", function () {\r",
+                  "    pm.expect(response.message.toLowerCase()).to.include(\"not found\");\r",
+                  "});\r",
+                  "\r",
+                  "// Response time\r",
+                  "pm.test(\"Response time below 2 seconds\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Already Deleted User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Status code is 404 Not Found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message exists\", function () {\r",
+                  "    pm.expect(response.message).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Message contains user not found\", function () {\r",
+                  "    pm.expect(response.message.toLowerCase()).to.include(\"not found\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time below 2 seconds\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/209",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "209"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Duplicate Email (Conflict – DummyJSON Limitation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// DummyJSON limitation\r\npm.test(\"DummyJSON allows duplicate user creation (known limitation)\", function () {\r\n    pm.expect(pm.response.code).to.eql(201);\r\n});\r\n\r\n// Email returned\r\npm.test(\"Email exists in response\", function () {\r\n    pm.expect(response.email).to.exist;\r\n});\r\n\r\n// Username returned\r\npm.test(\"Username exists in response\", function () {\r\n    pm.expect(response.username).to.exist;\r\n});\r\n\r\n// Document limitation\r\npm.test(\"Known limitation acknowledged\", function () {\r\n    pm.expect(pm.response.code).to.eql(201);\r\n});\r\n\r\n// Performance\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"Sruthi\",\r\n  \"lastName\": \"VS\",\r\n  \"email\": \"sruthi@gmail.com\",\r\n  \"username\": \"sruthi_vs\",\r\n  \"password\": \"Password@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "add"
+              ]
+            },
+            "description": "## Negative Test — Duplicate Email / Username\n\nAttempts to create a user using an existing email or username.\n\n### Expected in Production API\n\n- 409 Conflict.\n    \n\n### DummyJSON Behavior\n\nDummyJSON creates the resource again and returns **201 Created** instead of detecting duplicates.\n\nThis limitation is documented as part of the project."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Empty Request Body",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"DummyJSON accepts empty request body (known limitation)\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"User ID is generated\", function () {\r",
+                  "    pm.expect(response.id).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response body is not empty\", function () {\r",
+                  "    pm.expect(Object.keys(response).length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time below 2 seconds\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Login Endpoint (Unsupported Method – DummyJSON Limitation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// DummyJSON limitation\r\npm.test(\"DummyJSON rejects PATCH on login endpoint\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([401,404,405]);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Document limitation\r\npm.test(\"Known DummyJSON limitation documented\", function () {\r\n    pm.expect(response.message.toLowerCase())\r\n        .to.match(/access token|not found|method|cannot/);\r\n});\r\n\r\n// Performance\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"emilys\",\r\n  \"password\": \"emilyspass\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "## Negative Test — Unsupported HTTP Method\n\nThis test sends a PATCH request to the login endpoint.\n\n### Expected in Production API\n\n- 405 Method Not Allowed.\n    \n\n### DummyJSON Behavior\n\nDummyJSON returns **401 Unauthorized** instead of **405** because authentication is evaluated before HTTP method validation.\n\nThis limitation is intentionally documented and accepted for this practice project."
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Login - Missing Username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 400\", function () {\r\n    pm.expect(pm.response.code).to.eql(400);\r\n});\r\n\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\npm.test(\"Message mentions username\", function () {\r\n    pm.expect(response.message.toLowerCase()).to.include(\"username\");\r\n});\r\n\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"password\": \"emilyspass\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "## Negative Test — Missing Username\n\nValidates API behavior when the username field is omitted from the login request.\n\n### Expected Result\n\n- Status Code: 400 Bad Request.\n    \n- Error message indicates username is required.\n    \n\n### Validation\n\n- Error message exists.\n    \n- Response time below 2 seconds."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Missing Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status code validation\r\npm.test(\"Status code is 400 Bad Request\", function () {\r\n    pm.expect(pm.response.code).to.eql(400);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Error mentions password\r\npm.test(\"Message mentions password\", function () {\r\n    pm.expect(response.message.toLowerCase()).to.include(\"password\");\r\n});\r\n\r\n// Exact validation message\r\npm.test(\"Correct validation message returned\", function () {\r\n    pm.expect(response.message).to.eql(\"Username and password required\");\r\n});\r\n\r\n// Response time validation\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"emilys\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "### POST Missing Password\n\n**Purpose**\n\nVerify that the Login API rejects requests where the password field is missing.\n\n**Request**\n\n- Method: POST\n    \n- Endpoint: `/auth/login`\n    \n- Missing field: `password`\n    \n\n**Expected Result**\n\n- Status Code: **400 Bad Request**\n    \n- Error message: **Username and password required**\n    \n\n**Validation Performed**\n\n- Verified status code.\n    \n- Verified error message exists.\n    \n- Verified response mentions password.\n    \n- Verified exact validation message.\n    \n- Verified response time is below 2 seconds."
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Profile - Missing Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status code validation\r\npm.test(\"Status code is 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Correct authentication message\r\npm.test(\"Message says Access Token is required\", function () {\r\n    pm.expect(response.message).to.eql(\"Access Token is required\");\r\n});\r\n\r\n// Response time validation\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "## Negative Test — Profile Without Token\n\nValidates authentication enforcement when no Bearer Token is provided.\n\n### Expected Result\n\n- Status Code: 401 Unauthorized.\n    \n- Error message: Access Token is required."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Profile With Invalid Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status code validation\r\npm.test(\"Status code is 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Error mentions invalid or expired token\r\npm.test(\"Message mentions invalid or expired token\", function () {\r\n    pm.expect(response.message.toLowerCase())\r\n        .to.match(/invalid|expired|token/);\r\n});\r\n\r\n// Response time validation\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "invalid_token_123456789",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Profile With Expired Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status code validation\r\npm.test(\"Status code is 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\n// Error message exists\r\npm.test(\"Error message exists\", function () {\r\n    pm.expect(response.message).to.exist;\r\n});\r\n\r\n// Error mentions invalid or expired token\r\npm.test(\"Message mentions invalid or expired token\", function () {\r\n    pm.expect(response.message.toLowerCase())\r\n        .to.match(/invalid|expired|token/);\r\n});\r\n\r\n// Response time validation\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "invalid_token_123456789",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Validates API behavior for invalid requests, authentication failures, authorization failures, malformed payloads, invalid endpoints, expired tokens, and other error scenarios.\n\nPurpose:  \nEnsure the API returns the correct HTTP status codes and error messages for invalid inputs."
+    },
+    {
+      "name": "03 User Management",
+      "item": [
+        {
+          "name": "DELETE - Delete User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();\r\n\r\n// Status code validation\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n// User ID matches environment variable\r\npm.test(\"Deleted User ID matches environment\", function () {\r\n    pm.expect(response.id).to.eql(1);\r\n});\r\n\r\n// User is marked as deleted\r\npm.test(\"User is deleted\", function () {\r\n    pm.expect(response.isDeleted).to.eql(true);\r\n});\r\n\r\n// Deletion timestamp exists\r\npm.test(\"Deletion timestamp exists\", function () {\r\n    pm.expect(response.deletedOn).to.exist;\r\n});\r\n\r\n// Remove user_id from environment after deletion\r\npm.environment.unset(\"user_id\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status\r\npm.test(\"Status code is 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\n// User ID exists\r\npm.test(\"User ID exists\", function () {\r\n    pm.expect(response.id).to.exist;\r\n});\r\n\r\n// Username returned correctly\r\npm.test(\"Username matches request\", function () {\r\n    pm.expect(response.username).to.eql(\"sruthivs_qa\");\r\n});\r\n\r\n// Email returned correctly\r\npm.test(\"Email matches request\", function () {\r\n    pm.expect(response.email).to.eql(\"sruthi.vs.qa@example.com\");\r\n});\r\n\r\n// Gender returned correctly\r\npm.test(\"Gender is female\", function () {\r\n    pm.expect(response.gender).to.eql(\"female\");\r\n});\r\n\r\n// Response time\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"Sruthi\",\r\n  \"lastName\": \"VS\",\r\n  \"age\": 22,\r\n  \"gender\": \"female\",\r\n  \"email\": \"sruthi.vs.qa@example.com\",\r\n  \"phone\": \"9876543210\",\r\n  \"username\": \"sruthivs_qa\",\r\n  \"password\": \"Sruthi@123\",\r\n  \"birthDate\": \"2004-01-10\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "add"
+              ]
+            },
+            "description": "## Create User\n\nCreates a new user using the User Management API.\n\n### Method\n\n`POST`\n\n### Endpoint\n\n`{{base_url}}/users/add`\n\n### Expected Status\n\n**201 Created**\n\n### Validations\n\n- Status code is 201.\n    \n- User ID exists.\n    \n- Username exists.\n    \n- Email matches request.\n    \n- Gender matches request.\n    \n- Response time is below 2 seconds."
+          },
+          "response": []
+        },
+        {
+          "name": "GET User By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"User ID is 1\", function () {\r\n    pm.expect(response.id).to.eql(1);\r\n});\r\n\r\npm.test(\"First name exists\", function () {\r\n    pm.expect(response.firstName).to.exist;\r\n});\r\n\r\npm.test(\"Email contains @\", function () {\r\n    pm.expect(response.email).to.include(\"@\");\r\n});\r\n\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "1"
+              ]
+            },
+            "description": "## Get User By ID\n\nRetrieves details of a specific user using the user ID.\n\n### Expected Success\n\n- **Status:** 200 OK\n    \n- User information returned successfully.\n    \n- User ID matches the requested ID.\n    \n\n### Authorization\n\nRequires a valid Bearer Access Token stored in `{{access_token}}`.\n\n### Path Parameter\n\n`id` — Unique identifier of the user to retrieve."
+          },
+          "response": []
+        },
+        {
+          "name": "PUT - Update User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status Code\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n// ID Validation\r\npm.test(\"User ID is 1\", function () {\r\n    pm.expect(response.id).to.eql(1);\r\n});\r\n\r\n// First Name Validation\r\npm.test(\"First name updated\", function () {\r\n    pm.expect(response.firstName).to.eql(\"Sruthi\");\r\n});\r\n\r\n// Last Name Validation\r\npm.test(\"Last name updated\", function () {\r\n    pm.expect(response.lastName).to.eql(\"VS\");\r\n});\r\n\r\n// Email Validation\r\npm.test(\"Email updated\", function () {\r\n    pm.expect(response.email).to.eql(\"sruthi.vs.qa@example.com\");\r\n});\r\n\r\n// Gender Validation\r\npm.test(\"Gender is female\", function () {\r\n    pm.expect(response.gender).to.eql(\"female\");\r\n});\r\n\r\n// Phone Validation\r\npm.test(\"Phone updated\", function () {\r\n    pm.expect(response.phone).to.eql(\"9876543210\");\r\n});\r\n\r\n// Response Time Validation\r\npm.test(\"Response time below 2 seconds\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Transfer-Encoding",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"Sruthi\",\r\n  \"lastName\": \"VS\",\r\n  \"email\": \"sruthi.vs.qa@example.com\",\r\n  \"gender\": \"female\",\r\n  \"phone\": \"9876543210\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Retrieve Authenticated Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\n\r\n// Status Code\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n// User ID exists\r\npm.test(\"User ID exists\", function () {\r\n    pm.expect(response.id).to.exist;\r\n});\r\n\r\n// Username validation\r\npm.test(\"Username is emilys\", function () {\r\n    pm.expect(response.username).to.eql(\"emilys\");\r\n});\r\n\r\n// Email validation\r\npm.test(\"Email contains @\", function () {\r\n    pm.expect(response.email).to.include(\"@\");\r\n});\r\n\r\n// Gender validation\r\npm.test(\"Gender is female\", function () {\r\n    pm.expect(response.gender).to.eql(\"female\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://dummyjson.com/auth/me",
+              "protocol": "https",
+              "host": [
+                "dummyjson",
+                "com"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "## GET My Profile\n\nRetrieves authenticated user profile information using a Bearer Token.\n\n### Expected Success\n\n- Status Code: 200 OK\n    \n- User profile details returned.\n    \n\n### Authorization\n\nRequires a valid Bearer Access Token stored in the environment variable."
+          },
+          "response": []
+        }
+      ],
+      "description": "Tests CRUD operations for user management APIs.\n\nCoverage:\n\n- Create User\n    \n- Retrieve User\n    \n- Update User\n    \n- Delete User\n    \n- Retrieve Authenticated User Profile"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    }
+  ]
+}
