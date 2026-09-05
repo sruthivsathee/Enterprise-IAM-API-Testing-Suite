@@ -12,6 +12,13 @@
 This project demonstrates automated REST API testing using Postman and the DummyJSON API. It covers authentication, authorization, CRUD operations, user profile APIs, and negative testing scenarios using JavaScript assertions and Collection Runner.
 
 ---
+## 📄 Live Postman Documentation
+
+Explore the interactive API documentation published from Postman.
+
+🔗 **Live Documentation:** https://documenter.getpostman.com/view/31876883/2sBYAvwqdr
+
+---
 
 ## Highlights
 
