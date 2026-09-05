@@ -95,11 +95,11 @@ Enterprise-IAM-API-Testing-Suite
 
 ### Collection Structure
 
-![Collection Overview](screenshots/Collection%20Overview.png)
+![Collection Overview](screenshots/collection-overview.png)
 
 ### Environment Variables
 
-![Environment Variables](screenshots/Environment%20Variables.png)
+![Environment Variables](screenshots/environment-variables.png)
 
 ### Login API Test (200 OK)
 
@@ -111,7 +111,7 @@ Enterprise-IAM-API-Testing-Suite
 
 ### Collection Runner Results
 
-![Runner Results](screenshots/Collection%20Runner%20%E2%80%94%20126%20Passed.png)
+![Runner Results](screenshots/collection-runner-126-passed.png)
 
 ---
 
