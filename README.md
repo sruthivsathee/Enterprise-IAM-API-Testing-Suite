@@ -1,5 +1,10 @@
 # Enterprise IAM API Testing Suite
 
+![Postman](https://img.shields.io/badge/Postman-API%20Testing-orange)
+![JavaScript](https://img.shields.io/badge/JavaScript-Test%20Scripts-yellow)
+![REST API](https://img.shields.io/badge/REST-API-blue)
+![Automation](https://img.shields.io/badge/API-Automation-green)
+
 > End-to-End API Testing Project built with **Postman** for an Enterprise Identity and Access Management (IAM) system.
 
 ## Project Overview
@@ -8,16 +13,15 @@ This project demonstrates automated REST API testing using Postman and the Dummy
 
 ---
 
-## Project Features
+## Highlights
 
-* Authentication Testing
-* Bearer Token Authorization
-* User Management CRUD APIs
-* Negative API Testing
-* Automated Test Scripts
-* Environment Variables
-* Collection Runner Automation
-* Response Time Validation
+- 31 API requests covering Authentication, User Management, and Negative Testing.
+- 126 automated test assertions written using Postman JavaScript.
+- Bearer Token authentication with environment variables.
+- CRUD API validation using DummyJSON endpoints.
+- Collection Runner execution with 100% passing tests.
+- Response validation, schema checks, and response-time assertions.
+- HTTP status validation (200, 201, 400, 401, 403, 404).
 
 ---
 
@@ -43,14 +47,14 @@ Average response time during Collection Runner execution: **549 ms**.
 
 ---
 
-## Technologies Used
+## Tech Stack
 
-* Postman
-* JavaScript (Postman Test Scripts)
-* REST APIs
-* DummyJSON API
-* Collection Runner
-* Environment Variables
+| Tool | Purpose |
+|------|---------|
+| Postman | API testing & automation |
+| JavaScript | Test scripts and assertions |
+| DummyJSON API | Mock REST API |
+| GitHub | Version control & portfolio |
 
 ---
 
@@ -63,39 +67,51 @@ Average response time during Collection Runner execution: **549 ms**.
 
 ---
 
-## Folder Structure
+## Repository Structure
 
 ```text
-collections/
-environments/
-screenshots/
-README.md
-LICENSE
+Enterprise-IAM-API-Testing-Suite
+│
+├── collections/
+│   └── Enterprise IAM API Testing Suite.postman_collection.json
+│
+├── environments/
+│   └── IAM Dev.postman_environment.json
+│
+├── screenshots/
+│   ├── Collection Overview.png
+│   ├── Environment Variables.png
+│   ├── GET My Profile Success.png
+│   ├── POST Login Success Tests.png
+│   └── Collection Runner — 126 Passed.png
+│
+├── README.md
+└── LICENSE
 ```
 
 ---
 
 ## Project Screenshots
 
-### Collection Runner — All Tests Passed
+### Collection Structure
 
-![Collection Runner](screenshots/collection-runner-126-passed.png)
-
-### Collection Overview
-
-![Collection Overview](screenshots/collection-overview.png)
-
-### Authentication — Login Success
-
-![Login Success](screenshots/post-login-success-tests.png)
+![Collection Overview](screenshots/Collection%20Overview.png)
 
 ### Environment Variables
 
-![Environment Variables](screenshots/environment-variables.png)
+![Environment Variables](screenshots/Environment%20Variables.png)
 
-### User Profile API Success
+### Login API Test (200 OK)
 
-![User Profile](screenshots/get-my-profile-success.png)
+![Login Success](screenshots/post-login-success-tests.png)
+
+### Authenticated Profile API (200 OK)
+
+![Profile Success](screenshots/get-my-profile-success.png)
+
+### Collection Runner Results
+
+![Runner Results](screenshots/Collection%20Runner%20%E2%80%94%20126%20Passed.png)
 
 ---
 
